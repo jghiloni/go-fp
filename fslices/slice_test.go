@@ -136,8 +136,8 @@ var _ = Describe("Slice", func() {
 			test[i] = i
 		}
 
-		actual := fslices.SliceToMap(test, func(v int) string {
-			return string([]byte{byte(v) + 'A'})
+		actual := fslices.SliceToMap(test, func(v int) (string, int) {
+			return string([]byte{byte(v) + 'A'}), v
 		})
 
 		Expect(actual).To(BeEquivalentTo(expected))

@@ -173,12 +173,13 @@ func Shuffle[S ~[]E, E any](list S) {
 	copy(list, newlist)
 }
 
-// SliceToMap will take a slice and create a map[K]V and a func(val V) K where V is the type of the slice,
-// and K is [comparable]
-func SliceToMap[K comparable, X interface{ ~[]V }, V any](s X, keyGetter func(v V) K) map[K]V {
-	m := make(map[K]V, len(s))
-	for _, v := range s {
-		m[keyGetter(v)] = v
+// SliceToMap takes a slice and a function that splits that slice's items into a key-value pair, and creates a map
+// from those pairs
+func SliceToMap[X interface{ ~[]S }, S any, K comparable, V any](sSlice X, splitter func(v S) (K, V)) map[K]V {
+	m := make(map[K]V, len(sSlice))
+	for _, s := range sSlice {
+		k, v := splitter(s)
+		m[k] = v
 	}
 
 	return m
