@@ -55,6 +55,16 @@ var _ = Describe("Slice", func() {
 		Entry("empty", fslices.SubsliceUntil([]bool{}, func(b bool) bool { return !b }), []bool{}),
 	)
 
+	DescribeTable("Every", func(actual []int, expected bool) {
+		Expect(fslices.Every(actual, func(i int) bool {
+			return i%2 == 0
+		})).To(Equal(expected))
+	},
+		Entry("yes", []int{0, 2, 4, 6, 8, 10}, true),
+		Entry("no", []int{0, 2, 4, 6, 8, 10, 12, 1 << 30, (1 << 30) - 1}, false),
+		Entry("empty", []int{}, true),
+	)
+
 	DescribeTable("Map", func(actual []mapTest, expected []mapTest) {
 		Expect(actual).To(Equal(expected))
 	},

@@ -37,6 +37,17 @@ func FromAnySlice[T any](src []any) []T {
 	return dest
 }
 
+// Every will return true if test(t) is true for all items in src
+func Every[T any](src []T, test func(item T) bool) bool {
+	for _, item := range src {
+		if !test(item) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // SubsliceUntil will return a new slice with the first n elements represented in src, where
 // filter(src[n]) == true. Averages O(lg n) time.
 func SubsliceUntil[T any](src []T, filter func(item T) bool) []T {
