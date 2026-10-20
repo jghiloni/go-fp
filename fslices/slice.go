@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"slices"
 )
 
 // AnySlice takes a slice and returns the same slice, but with each value
@@ -194,4 +195,17 @@ func SliceToMap[X interface{ ~[]S }, S any, K comparable, V any](sSlice X, split
 	}
 
 	return m
+}
+
+// Disjoint takes two lists of the same comparable type and returns all items of A that are not present in B
+func Disjoint[T comparable](a []T, b []T) []T {
+	return Filter(a, func(t T) bool {
+		return !slices.Contains(b, t)
+	})
+}
+
+func DisjointFunc[S interface{ ~[]E }, E any](a S, b S, compFn func(E) func(E) bool) S {
+	return Filter(a, func(e E) bool {
+		return !slices.ContainsFunc(b, compFn(e))
+	})
 }

@@ -28,55 +28,61 @@ func utID(u uniqTest) int {
 }
 
 var _ = Describe("Slice", func() {
-	DescribeTable("AnySlice", func(actual []any, expected []any) {
-		Expect(actual).To(HaveLen(len(expected)))
-		for i, a := range actual {
-			Expect(a).To(BeEquivalentTo(expected[i]))
-		}
-	},
+	DescribeTable(
+		"AnySlice", func(actual []any, expected []any) {
+			Expect(actual).To(HaveLen(len(expected)))
+			for i, a := range actual {
+				Expect(a).To(BeEquivalentTo(expected[i]))
+			}
+		},
 		Entry("full", fslices.AnySlice([]string{"a", "b", "c"}), []any{"a", "b", "c"}),
 		Entry("empty", fslices.AnySlice([]bool{}), []any{}),
 	)
 
-	DescribeTable("FromAnySlice", func(actual []string, expected []string) {
-		Expect(actual).To(HaveLen(len(expected)))
-		for i, a := range actual {
-			Expect(a).To(BeEquivalentTo(expected[i]))
-		}
-	},
+	DescribeTable(
+		"FromAnySlice", func(actual []string, expected []string) {
+			Expect(actual).To(HaveLen(len(expected)))
+			for i, a := range actual {
+				Expect(a).To(BeEquivalentTo(expected[i]))
+			}
+		},
 		Entry("full", fslices.FromAnySlice[string]([]any{"a", "b", "c"}), []string{"a", "b", "c"}),
 		Entry("empty", fslices.FromAnySlice[string]([]any{}), []string{}),
 	)
 
-	DescribeTable("SubsliceUntil", func(actual []bool, expected []bool) {
-		Expect(actual).To(Equal(expected))
-	},
+	DescribeTable(
+		"SubsliceUntil", func(actual []bool, expected []bool) {
+			Expect(actual).To(Equal(expected))
+		},
 		Entry("full", fslices.SubsliceUntil([]bool{false, false, true}, func(b bool) bool { return b }), []bool{false, false}),
 		Entry("empty", fslices.SubsliceUntil([]bool{}, func(b bool) bool { return !b }), []bool{}),
 	)
 
-	DescribeTable("Every", func(actual []int, expected bool) {
-		Expect(fslices.Every(actual, func(i int) bool {
-			return i%2 == 0
-		})).To(Equal(expected))
-	},
+	DescribeTable(
+		"Every", func(actual []int, expected bool) {
+			Expect(fslices.Every(actual, func(i int) bool {
+				return i%2 == 0
+			})).To(Equal(expected))
+		},
 		Entry("yes", []int{0, 2, 4, 6, 8, 10}, true),
 		Entry("no", []int{0, 2, 4, 6, 8, 10, 12, 1 << 30, (1 << 30) - 1}, false),
 		Entry("empty", []int{}, true),
 	)
 
-	DescribeTable("Map", func(actual []mapTest, expected []mapTest) {
-		Expect(actual).To(Equal(expected))
-	},
+	DescribeTable(
+		"Map", func(actual []mapTest, expected []mapTest) {
+			Expect(actual).To(Equal(expected))
+		},
 		Entry("full", fslices.Map([]int{1, 2, 4, 6}, func(i int) mapTest {
 			return mapTest{Val: i, IsEven: bp(i%2 == 0)}
 		}), []mapTest{{1, bp(false)}, {2, bp(true)}, {4, bp(true)}, {6, bp(true)}}),
 		Entry("empty", fslices.Map([]int{}, func(int) mapTest { return mapTest{} }), []mapTest{}),
 	)
 
-	DescribeTable("Filter", func(actual []time.Duration, expected []time.Duration) {
-		Expect(actual).To(Equal(expected))
-	},
+	DescribeTable(
+		"Filter", func(actual []time.Duration, expected []time.Duration) {
+			Expect(actual).To(Equal(expected))
+		},
 		Entry("full", fslices.Filter([]time.Duration{time.Minute, time.Millisecond, 3601 * time.Second, time.Hour, 59_000 * time.Millisecond}, func(d time.Duration) bool {
 			return d < time.Hour
 		}), []time.Duration{time.Minute, time.Millisecond, 59_000_000_000 * time.Nanosecond}),
@@ -86,26 +92,29 @@ var _ = Describe("Slice", func() {
 		Entry("empty src", fslices.Filter([]time.Duration{}, nil), []time.Duration{}),
 	)
 
-	DescribeTable("Reduce", func(x int, y int) { Expect(x).To(Equal(y)) },
+	DescribeTable(
+		"Reduce", func(x int, y int) { Expect(x).To(Equal(y)) },
 		Entry("fac", fslices.Reduce([]int{1, 2, 3, 4, 5}, func(cur int, val int) int {
 			return cur * val
 		}, 1), 120),
 		Entry("empty factorial", fslices.Reduce([]int{}, func(c int, v int) int { return c * v }, 1), 1),
 	)
 
-	DescribeTable("Uniq", func(expected, initial []int) {
-		actual := fslices.Uniq(initial)
-		Expect(actual).To(Equal(expected))
-	},
+	DescribeTable(
+		"Uniq", func(expected, initial []int) {
+			actual := fslices.Uniq(initial)
+			Expect(actual).To(Equal(expected))
+		},
 		Entry("no dupes", []int{1, 2, 3, 4, 5}, []int{1, 2, 3, 4, 5}),
 		Entry("all dupes", []int{1}, []int{1, 1, 1, 1, 1, 1}),
 		Entry("some dupes", []int{4, 3, 1, 2}, []int{4, 3, 3, 4, 1, 2, 3, 2, 4, 1}),
 	)
 
-	DescribeTable("UniqFunc", func(expected, initial []uniqTest) {
-		actual := fslices.UniqFunc(initial, utID)
-		Expect(actual).To(Equal(expected))
-	},
+	DescribeTable(
+		"UniqFunc", func(expected, initial []uniqTest) {
+			actual := fslices.UniqFunc(initial, utID)
+			Expect(actual).To(Equal(expected))
+		},
 		Entry("no dupes", []uniqTest{newUniqTest(1), newUniqTest(2), newUniqTest(3), newUniqTest(4), newUniqTest(5)}, []uniqTest{newUniqTest(1), newUniqTest(2), newUniqTest(3), newUniqTest(4), newUniqTest(5)}),
 		Entry("all dupes", []uniqTest{newUniqTest(1)}, []uniqTest{newUniqTest(1), newUniqTest(1), newUniqTest(1), newUniqTest(1), newUniqTest(1), newUniqTest(1)}),
 		Entry("some dupes", []uniqTest{newUniqTest(4), newUniqTest(3), newUniqTest(1), newUniqTest(2)}, []uniqTest{newUniqTest(4), newUniqTest(3), newUniqTest(3), newUniqTest(4), newUniqTest(1), newUniqTest(2), newUniqTest(3), newUniqTest(2), newUniqTest(4), newUniqTest(1)}),
@@ -151,6 +160,35 @@ var _ = Describe("Slice", func() {
 		})
 
 		Expect(actual).To(BeEquivalentTo(expected))
+	})
+
+	Describe("Disjoint", func() {
+		a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
+		b := []int{2, 4, 6, 8, 0}
+		expected := []int{1, 3, 5, 7, 9}
+		actual := fslices.Disjoint(a, b)
+		Expect(actual).To(Equal(expected))
+	})
+
+	Describe("DisjointFunc", func() {
+		type t struct {
+			val int
+		}
+
+		getTs := func(vals ...int) []t {
+			return fslices.Map(vals, func(i int) t { return t{val: i} })
+		}
+
+		a := getTs(1, 2, 3, 4, 5, 6, 7, 8, 9, 0)
+		b := getTs(2, 4, 6, 8, 0)
+		expected := getTs(1, 3, 5, 7, 9)
+		actual := fslices.DisjointFunc(a, b, func(val t) func(t) bool {
+			return func(t t) bool {
+				return val.val == t.val
+			}
+		})
+
+		Expect(actual).To(Equal(expected))
 	})
 })
 
