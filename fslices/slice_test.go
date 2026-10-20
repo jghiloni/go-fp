@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jghiloni/go-fp/fslices"
+	"github.com/jghiloni/go-fp/v2/fslices"
 )
 
 type mapTest struct {
@@ -74,8 +74,8 @@ var _ = Describe("Slice", func() {
 			Expect(actual).To(Equal(expected))
 		},
 		Entry("full", fslices.Map([]int{1, 2, 4, 6}, func(i int) mapTest {
-			return mapTest{Val: i, IsEven: bp(i%2 == 0)}
-		}), []mapTest{{1, bp(false)}, {2, bp(true)}, {4, bp(true)}, {6, bp(true)}}),
+			return mapTest{Val: i, IsEven: new(i%2 == 0)}
+		}), []mapTest{{1, new(false)}, {2, new(true)}, {4, new(true)}, {6, new(true)}}),
 		Entry("empty", fslices.Map([]int{}, func(int) mapTest { return mapTest{} }), []mapTest{}),
 	)
 
@@ -83,9 +83,9 @@ var _ = Describe("Slice", func() {
 		"Filter", func(actual []time.Duration, expected []time.Duration) {
 			Expect(actual).To(Equal(expected))
 		},
-		Entry("full", fslices.Filter([]time.Duration{time.Minute, time.Millisecond, 3601 * time.Second, time.Hour, 59_000 * time.Millisecond}, func(d time.Duration) bool {
+		Entry("full", fslices.Filter([]time.Duration{time.Minute, time.Millisecond, 3601 * time.Second, time.Hour, 59_999_999_999 * time.Nanosecond}, func(d time.Duration) bool {
 			return d < time.Hour
-		}), []time.Duration{time.Minute, time.Millisecond, 59_000_000_000 * time.Nanosecond}),
+		}), []time.Duration{time.Minute, time.Millisecond, time.Minute - time.Nanosecond}),
 		Entry("empty result", fslices.Filter([]time.Duration{61 * time.Minute, 2 * time.Hour}, func(d time.Duration) bool {
 			return d < time.Hour
 		}), []time.Duration{}),
@@ -182,16 +182,10 @@ var _ = Describe("Slice", func() {
 		a := getTs(1, 2, 3, 4, 5, 6, 7, 8, 9, 0)
 		b := getTs(2, 4, 6, 8, 0)
 		expected := getTs(1, 3, 5, 7, 9)
-		actual := fslices.DisjointFunc(a, b, func(val t) func(t) bool {
-			return func(t t) bool {
-				return val.val == t.val
-			}
+		actual := fslices.DisjointFunc(a, b, func(t1, t2 t) bool {
+			return t1.val == t2.val
 		})
 
 		Expect(actual).To(Equal(expected))
 	})
 })
-
-func bp(b bool) *bool {
-	return &b
-}

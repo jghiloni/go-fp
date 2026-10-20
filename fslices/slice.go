@@ -158,7 +158,6 @@ func Shuffle[S ~[]E, E any](list S) {
 
 	idxAttempts := max(min(math.MaxInt, len(list)*5), 5000)
 	next := func() int {
-
 		for range idxAttempts {
 			i, _ := rand.Int(rand.Reader, ub)
 			if _, found := used[i.Int64()]; found {
@@ -204,8 +203,10 @@ func Disjoint[T comparable](a []T, b []T) []T {
 	})
 }
 
-func DisjointFunc[S interface{ ~[]E }, E any](a S, b S, compFn func(E) func(E) bool) S {
-	return Filter(a, func(e E) bool {
-		return !slices.ContainsFunc(b, compFn(e))
+func DisjointFunc[S interface{ ~[]E }, E any](a S, b S, compFn func(e1, e2 E) bool) S {
+	return Filter(a, func(e1 E) bool {
+		return !slices.ContainsFunc(b, func(e2 E) bool {
+			return compFn(e1, e2)
+		})
 	})
 }
